@@ -4,17 +4,24 @@ Portal de **Ciudades(In)Posibles**, un juego emersivo sobre nuestro derecho a co
 
 ## Repositorio
 
+Este repositorio contiene solo la web. Cronista, Cartógrafo y `functions/` siguen en disco, pero están fuera de git (ver `.gitignore`) y se respaldan en `~/Desarollo/_respaldos/`.
+
 ```
 public/        portal · https://ciudadesinposibles.net (HTML + CSS + JS vanilla)
-cartografo/    app · https://cartografo.ciudadesinposibles.net (React + Vite + Tailwind)
-cronista/      app · https://cronista.ciudadesinposibles.net (React + Vite + Tailwind)
 herramientas/  scripts de diseño (mosaico.py genera los SVG del mosaico)
 docs/          fuente del contenido; no se publica ni se versiona
-functions/     Cloud Functions v2 (Node 22) que consultan la IA para las dos apps
-firebase.json  Hosting (principal, cartografo, cronista), Functions y reglas de Firestore
+firebase.json  Hosting y reglas de Firestore
 ```
 
-- GitHub `MangleRojo-ORG/ciudadesinposibles` (privado). Commits pequeños y descriptivos, directo en `main`.
+Fuera de git, solo en disco:
+
+```
+cartografo/    app · https://cartografo.ciudadesinposibles.net (React + Vite + Tailwind)
+cronista/      app · https://cronista.ciudadesinposibles.net (React + Vite + Tailwind)
+functions/     Cloud Functions v2 (Node 22) que consultan la IA para las dos apps
+```
+
+- Commits pequeños y descriptivos. GitHub `Ciudades-in-Posibles/web` (`origin`, público), directo en `main` o en ramas cortas.
 - Nunca subas credenciales. Las apps no usan archivos `.env`: la clave de la IA vive en Secret Manager. `cartografo/data/` está en `.gitignore`.
 - **Textos:** todo texto nuevo o reescrito se pasa a revisión del equipo antes de aplicarlo.
 
@@ -24,7 +31,7 @@ firebase.json  Hosting (principal, cartografo, cronista), Functions y reglas de 
 - Rutas: `/` · `/manifiesto/` (§ 00 y `coordenada-i/` a `coordenada-v/`) · `/el-juego/` (cómo se juega) · `/cronista/` (tarjeta que abre la app) · `/espacios/` · `/documentacion/` (`referencias/`, `glosario/`, `ciudad-1-5/`) · `/acerca/`.
 - Cada página es `carpeta/index.html` y repite cabecera y pie. Un cambio en el menú o el pie va en todas, incluida `404.html`.
 - Página nueva: `<link rel="canonical" href="https://ciudadesinposibles.net/<ruta>/">` y entrada en `sitemap.xml`. Las rutas cambiadas redirigen con 301 desde `firebase.json` (`/juego/` → `/el-juego/`, `/asistentes/` → `/cronista/`).
-- **Caché de 24 h:** si cambias `styles.css` o `main.js`, sube su `?v=N` en todas las páginas (hoy `styles.css?v=31` y `main.js?v=8`).
+- **Caché de 24 h:** si cambias `styles.css` o `main.js`, sube su `?v=N` en todas las páginas (hoy `/css/styles.css?v=33` y `/js/main.js?v=8`; `aparatos.css`, `cartas.css`, `juego.css`, `portada.css`, `juego.js` y `portada.js` llevan su propio `?v=N`).
 - **Contenido:**
   - El Manifiesto es copia fiel de `docs/Manifiesto/*.md`; cada cambio se hace en los dos lados.
   - Las referencias son fichas curadas con citas breves.
@@ -42,6 +49,8 @@ firebase.json  Hosting (principal, cartografo, cronista), Functions y reglas de 
 - **Tema claro:** papel `#F5F3EA` con tinta negra. Sigue `prefers-color-scheme` y el botón de la cabecera (`data-tema` en `<html>`, en `localStorage`). Fondo y texto con `--fondo`, `--tinta`, `--tinta-2` y `--superficie`; acentos con `--acento-*` (contraste ≥ 3:1). Los tokens van en la media query y en `[data-tema="claro"]`, idénticos.
 
 ## Asistentes
+
+Esta sección describe las apps que viven fuera de este repositorio. Se conserva como referencia.
 
 Dispositivos de juego y relato inspirados en Italo Calvino, con vocabulario separado:
 
@@ -73,13 +82,10 @@ Las dos apps comparten comandos: `npm run dev`, `npm test` y `npm run build` (ge
 firebase serve --only hosting:principal          # portal en local
 firebase hosting:channel:deploy <canal>          # vista previa
 firebase deploy --only hosting:principal         # portal en producción
-cd cartografo && npm run build && cd .. && firebase deploy --only hosting:cartografo
-cd cronista && npm run build && cd .. && firebase deploy --only hosting:cronista
-firebase deploy --only firestore                 # reglas de ambas bases
-firebase deploy --only functions                 # funciones de IA
 ```
 
-- Producción solo después de revisión. Además de Hosting, Firestore y Functions, no agregues servicios de Firebase (Storage, bases nuevas…) sin que se pida.
+- Desde este repositorio se publica solo `hosting:principal`. Cronista, Cartógrafo, Firestore y Functions se despliegan desde sus carpetas en disco, fuera de aquí.
+- Producción solo después de revisión. No agregues servicios de Firebase (Storage, bases nuevas…) sin que se pida.
 - Pendiente para el rediseño: App Check o un límite por usuario en las funciones, porque hoy responden a cualquier cuenta anónima.
 - Dominio en Namecheap (*Advanced DNS*): host relativo (`cartografo`), conserva el TXT SPF del reenvío de correo. `www` redirige al dominio sin www desde Firebase.
 
