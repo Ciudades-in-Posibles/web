@@ -1,0 +1,74 @@
+/* ==========================================================================
+   Páginas de El juego (Cómo se juega, Canales, Cartas). Se carga después de
+   styles.css, aparatos.css y, donde hay cartas, cartas.css. Las medidas van
+   en cqw del marco .maq; en móvil, @container maq (max-width: 700px).
+   ========================================================================== */
+
+/* ---------- columna de contenido del dossier ---------- */
+.j { min-width: 0; padding-bottom: var(--sp-6); }
+
+/* ---------- cabecera: titular grande a la izquierda, extracto a la derecha ---------- */
+.j-cab { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(20px, 4cqw, 56px); align-items: center; padding-block: clamp(20px, 3cqw, 40px) 0; }
+.j-cab h1 { font-weight: 900; font-size: clamp(36px, 5.6cqw, 80px); line-height: .98; letter-spacing: -.015em; text-wrap: balance; }
+.j-cab .res { margin-block: .1em; }
+/* Cómo se juega: la cabecera va en un bloque del color de la página, recto y
+   con la esquina cortada, como las cabeceras de las demás páginas. */
+.j-tarjeta { background: var(--c); color: var(--c-tinta); padding: clamp(24px, 4cqw, 56px); padding-bottom: calc(clamp(24px, 4cqw, 56px) + var(--corte) * 0.5); margin-top: clamp(8px, 1.4cqw, 20px); clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--corte)), calc(100% - var(--corte)) 100%, 0 100%); }
+.ex { font-size: clamp(17px, 1.7cqw, 21px); line-height: 1.5; }
+
+/* ---------- momentos: número, nombre, texto corto y aparato ---------- */
+.mom { margin-top: clamp(64px, 9cqw, 130px); min-width: 0; }
+.mom-cab { display: grid; grid-template-columns: auto 1fr; gap: 6px clamp(14px, 2.4cqw, 32px); align-items: center; max-width: 52rem; }
+.mom-n { grid-row: span 2; background: var(--k); color: var(--calle); font-weight: 900; font-size: clamp(48px, 7.4cqw, 104px); line-height: .9; padding: .06em .16em .1em; border-radius: var(--celula-2); letter-spacing: -.02em; }
+.mom-n.k9 { color: var(--crema); }
+.mom h2 { font-weight: 800; font-size: clamp(30px, 4.4cqw, 58px); line-height: 1; letter-spacing: -.01em; text-wrap: balance; }
+.mom-cab p { grid-column: 2; max-width: 38rem; font-size: clamp(17px, 1.5cqw, 20px); line-height: 1.45; }
+.mom .aparato { margin-top: clamp(24px, 3.4cqw, 44px); margin-inline: auto; }
+.mom .aparato > .voltea { margin-inline: auto; }
+
+/* ---------- componente de volteo ---------- */
+.voltea { display: grid; justify-items: center; gap: var(--sp-3); width: min(100%, var(--ancho, 36rem)); perspective: 1600px; }
+.voltea-in { display: grid; width: 100%; align-items: center; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.4, .1, .2, 1); cursor: pointer; }
+.voltea-in:focus-visible { outline: 3px solid var(--tinta); outline-offset: 6px; border-radius: 12px; }
+.cara { grid-area: 1 / 1; min-width: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.cara-e { transform: rotateY(180deg); }
+.voltea.vuelta-on .voltea-in { transform: rotateY(180deg); }
+/* Sin JS: no hay giro; las dos caras se muestran lado a lado. */
+html:not(.js) .voltea { width: 100%; }
+html:not(.js) .voltea-in { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); cursor: auto; }
+html:not(.js) .cara { grid-area: auto; backface-visibility: visible; }
+html:not(.js) .cara-e { transform: none; }
+/* Sin movimiento: sin giro 3D; se muestra una cara u otra. */
+@media (prefers-reduced-motion: reduce) {
+  html.js .voltea-in { transition: none; }
+  html.js .voltea.vuelta-on .voltea-in { transform: none; }
+  html.js .cara-e { transform: none; opacity: 0; visibility: hidden; }
+  html.js .voltea.vuelta-on .cara-f { opacity: 0; visibility: hidden; }
+  html.js .voltea.vuelta-on .cara-e { opacity: 1; visibility: visible; }
+}
+
+/* ---------- cartas de canal en cuadrícula ---------- */
+.cartas-9 { list-style: none; padding: 0; margin-top: clamp(32px, 4.4cqw, 64px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 3.4cqw, 48px) clamp(16px, 3cqw, 40px); }
+.cartas-9 .voltea { --ancho: 100%; }
+
+/* ---------- página Cartas: un bloque por carta ---------- */
+.cb { margin-top: clamp(64px, 9cqw, 130px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 4cqw, 56px); align-items: center; }
+.cb:first-of-type { margin-top: clamp(40px, 5cqw, 72px); }
+.cb .voltea { --ancho: 19rem; }
+.cb .voltea--h { --ancho: 30rem; }
+.cb-txt { display: grid; gap: 10px; align-content: center; min-width: 0; }
+.cb-txt h2 { font-weight: 800; font-size: clamp(30px, 4.4cqw, 58px); line-height: 1; letter-spacing: -.01em; }
+.cb-txt p { max-width: 34rem; font-size: clamp(17px, 1.5cqw, 20px); line-height: 1.45; }
+
+/* ---------- móvil ---------- */
+@container maq (max-width: 700px) {
+  .j-cab { grid-template-columns: 1fr; }
+  .j-cab h1 { font-size: 10.6cqw; }
+  .mom-n { font-size: 15cqw; }
+  .mom h2 { font-size: 9cqw; }
+  .cartas-9 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cb { grid-template-columns: 1fr; }
+  .cb-txt h2 { font-size: 9cqw; }
+  .cb .voltea, .cb .voltea--h { --ancho: 100%; }
+  html:not(.js) .voltea-in { grid-template-columns: 1fr; }
+}

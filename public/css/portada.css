@@ -1,0 +1,162 @@
+/* ==========================================================================
+   Portada «Ahora primero». Se carga después de styles.css y usa sus tokens
+   (--fondo, --tinta, --calle, --crema, paleta, --font-titular, --font-mono…).
+   Las clases que chocan con styles.css (.btn, .in, .res, .dato) van acotadas
+   a .portada (clase de <body>). El marco del sitio (.maq, cabecera y pie
+   negros) vive en styles.css; aquí las medidas van en cqw de ese marco y
+   las cartas (.ct) y los colores de canal (.k1–.k9) viven en cartas.css.
+   ========================================================================== */
+
+.portada {
+  --estatica: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='120'%3E%3Cfilter id='s' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 .3 .7 1'/%3E%3CfeFuncG type='discrete' tableValues='0 .3 .7 1'/%3E%3CfeFuncB type='discrete' tableValues='0 .3 .7 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+  overflow-x: hidden;
+}
+
+/* El hero arranca pegado a la franja de grano de la cabecera. */
+.portada #contenido { padding-top: 0; }
+
+/* ---------- piezas comunes ---------- */
+.portada .in { background: var(--amarillo); color: var(--calle); }
+.portada .btn { min-height: 46px; padding: 12px 20px; font: 600 16px/1 var(--font-titular); border: 3px solid var(--calle); background: var(--calle); color: var(--crema); border-radius: 1.2rem 0.5rem 1.2rem 0.5rem; justify-self: start; }
+.portada .btn:hover { background: transparent; color: var(--calle); border-color: var(--calle); }
+.portada .btn-claro { background: var(--tinta); color: var(--fondo); border-color: var(--tinta); }
+.portada .btn-claro:hover { background: transparent; color: var(--tinta); border-color: var(--tinta); }
+.portada .dato { font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0; }
+.portada .res { margin-block: 0.1em; }
+.ex { font-size: clamp(17px, 1.7cqw, 21px); line-height: 1.5; }
+.ex strong { font-weight: 600; }
+.vivo { display: inline-block; background: var(--rojo); color: var(--calle); font: 600 11px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 7px; border-radius: 4px; margin-bottom: 6px; }
+
+/* ---------- pantalla CRT ---------- */
+.pant { position: relative; overflow: hidden; background: var(--calle); max-width: 100%; }
+.pant img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.06); }
+.pant::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, rgb(11 11 12 / .3) 0 1px, transparent 1px 3px); }
+.pant .ruido { position: absolute; inset: 0; background: var(--calle) var(--estatica) 0 0 / 160px 120px; opacity: 0; z-index: 1; }
+.pant.cambia .ruido { opacity: 1; animation: nieve .26s steps(4) both; }
+@keyframes nieve { 0% { background-position: 0 0; } 25% { background-position: -40px 30px; } 50% { background-position: 30px -50px; } 75% { background-position: -70px -20px; } 100% { background-position: 10px 60px; } }
+.pill { position: absolute; z-index: 2; display: flex; flex-direction: row-reverse; align-items: stretch; gap: 4px; }
+.pill .n { display: grid; place-items: center; min-width: 1.4em; padding: .04em .2em .08em; font-weight: 900; font-size: clamp(20px, 3.6cqw, 40px); line-height: 1; color: var(--calle); background: var(--k, var(--amarillo)); border-radius: .22em .1em .26em .12em; }
+.pill .nm { align-self: flex-start; font: 600 clamp(11px, 1.1cqw, 13px)/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; background: var(--calle); color: var(--crema); padding: 6px 8px; border-radius: 4px; }
+.mando { display: flex; gap: 6px; }
+.mando button { font: 600 12px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; min-height: 40px; padding: 0 12px; border: 0; background: var(--calle); color: var(--crema); border-radius: .8rem .4rem .8rem .4rem; cursor: pointer; }
+.mando button:focus-visible { outline: 3px solid var(--crema); outline-offset: 2px; }
+html:not(.js) .mando { display: none; }
+
+/* ---------- hero: afiche a sangre con el nombre ---------- */
+.hA { position: relative; background: var(--calle); aspect-ratio: 16 / 9; min-height: 400px; overflow: hidden; }
+.hA :focus-visible { outline-color: var(--crema); }
+.hA .pant { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hA .pant img { transform: scale(1.04); }
+.pill.k9 .n { color: var(--crema); }
+.hA .pill { right: clamp(16px, 4cqw, 48px); top: clamp(16px, 3cqw, 32px); }
+.tira { background: var(--calle); color: var(--crema); padding: .02em .16em .1em; border-radius: .1em .04em .12em .05em; white-space: nowrap; }
+.tira .in { font-size: 1em; padding: 0 .1em .04em; margin-inline: .08em .06em; border-radius: .06em .03em .08em .04em; }
+.hA h1 { font-weight: 900; font-size: min(8.4cqw, 140px); line-height: 1; letter-spacing: -.025em; display: block; }
+.hA h1 .tira { display: block; white-space: nowrap; line-height: .94; padding: .11em .18em .09em; }
+.hA .tira .in { line-height: .82; padding: .06em .1em .08em; vertical-align: .02em; }
+.h-centro { position: absolute; z-index: 2; inset: 0; display: grid; align-content: center; justify-items: start; padding: 8cqw clamp(16px, 3.4cqw, 44px) 0; }
+.h-pie { position: absolute; z-index: 2; left: clamp(16px, 3.4cqw, 44px); right: clamp(16px, 3.4cqw, 44px); bottom: clamp(16px, 2.6cqw, 32px); display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
+.canales { display: grid; grid-template-columns: repeat(9, clamp(30px, 4.2cqw, 58px)); gap: clamp(5px, .7cqw, 9px); margin: clamp(10px, 1.4cqw, 18px) 0 0; padding: 0; list-style: none; }
+.canales button { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1.12; border: clamp(3px, .45cqw, 6px) solid var(--calle); padding: 0; cursor: pointer; background: var(--k); color: var(--calle); font: 900 clamp(15px, 2.2cqw, 30px)/1 var(--font-titular); transition: transform .15s; }
+.canales button[aria-pressed="true"] { transform: translateY(-14%); }
+.canales li:nth-child(1) button { border-radius: 22% 14% 18% 16%; }
+.canales li:nth-child(2) button { border-radius: 16% 48% 14% 16%; }
+.canales li:nth-child(3) button { border-radius: 46% 14% 16% 18%; }
+.canales li:nth-child(4) button { border-radius: 16% 14% 50% 16%; }
+.canales li:nth-child(5) button { border-radius: 44% 16% 14% 18%; }
+.canales li:nth-child(6) button { border-radius: 16% 16% 18% 46%; }
+.canales li:nth-child(7) button { border-radius: 14% 16% 48% 16%; }
+.canales li:nth-child(8) button { border-radius: 42% 16% 16% 14%; }
+.canales li:nth-child(9) button { border-radius: 46% 14% 16% 16%; }
+.canales button:focus-visible { outline: 3px solid var(--crema); outline-offset: 2px; }
+.hA .pant.sin-senal img { visibility: hidden; }
+.hA .pant.sin-senal .ruido { opacity: .9; animation: nieve .4s steps(4) infinite; }
+.hA .pant .ruido { z-index: 1; }
+/* tubo CRT: curvatura, viñeta, grano y barrido */
+.tubo { position: absolute; inset: clamp(6px, .9cqw, 12px); z-index: 1; pointer-events: none; overflow: hidden; border-radius: 3.2cqw / 4.4cqw;
+  box-shadow: 0 0 0 60px var(--calle), inset 0 0 5cqw 1.2cqw rgb(11 11 12 / .8);
+  background: radial-gradient(ellipse 58% 34% at 28% 18%, rgb(255 255 255 / .07), transparent 70%), radial-gradient(ellipse 85% 80% at 50% 50%, transparent 52%, rgb(11 11 12 / .62) 100%); }
+.tubo::before { content: ""; position: absolute; inset: 0; background: var(--estatica) 0 0 / 160px 120px; opacity: .14; mix-blend-mode: overlay; animation: nieve .5s steps(4) infinite; }
+.tubo::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 22%; background: linear-gradient(to bottom, transparent, rgb(255 255 191 / .07) 60%, transparent); transform: translateY(-100%); animation: barrido 8s linear infinite; }
+@keyframes barrido { to { transform: translateY(560%); } }
+
+/* ---------- secciones compartidas ---------- */
+.mz { padding: clamp(20px, 3.4cqw, 44px); color: var(--calle); display: grid; gap: 14px; align-content: start; min-width: 0; }
+.mz h2 { font-weight: 800; font-size: clamp(30px, 4.4cqw, 58px); line-height: 1; letter-spacing: -.01em; text-wrap: balance; }
+.mz h3, .e4-vivo .mz h2 { font-weight: 800; font-size: clamp(22px, 2.4cqw, 30px); line-height: 1.08; text-wrap: balance; }
+.mz h3 a, .mz h2 a { text-decoration: none; }
+.mz p { max-width: 38rem; }
+.mz :focus-visible { outline-color: var(--calle); }
+.v-nar { background: var(--naranja); } .v-tur { background: var(--turquesa); } .v-lim { background: var(--lima); } .v-azu { background: var(--azul); }
+.r1 { border-radius: var(--celula-1); } .r2 { border-radius: var(--celula-2); } .r3 { border-radius: var(--celula-3); } .r4 { border-radius: var(--celula-4); }
+.portada .calle { background: var(--calle); padding: var(--calle-ancho); display: grid; gap: var(--calle-ancho); }
+
+/* En curso */
+.e4-vivo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin-top: clamp(28px, 5cqw, 64px); }
+.portada .calle.e4-vivo { padding: clamp(8px, 1.1cqw, 14px); gap: clamp(8px, 1.1cqw, 14px); border-radius: 8px; }
+.frottages { position: relative; min-width: 0; }
+.frottage { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); border-radius: var(--celula-2); background: var(--papel); }
+/* Fundido cruzado: la toma nueva aparece encima de la anterior, sin pasar por negro. */
+.frottage.capa { position: absolute; inset: 0; transition: opacity 1.6s ease-in-out; }
+.frottage.capa.oculta { opacity: 0; }
+.e4-vivo > .mz { position: relative; z-index: 1; margin-left: calc(-1 * min(5cqw, 60px)); box-shadow: -10px 0 28px rgb(0 0 0 / .45); }
+.aliados { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 8px; padding-top: 16px; border-top: 1px solid rgb(11 11 12 / .25); }
+.aliados img { height: clamp(40px, 4.4cqw, 54px); width: auto; }
+
+/* Co-crear */
+.e2-cc { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(20px, 4cqw, 56px); align-items: center; padding-block: clamp(36px, 6cqw, 80px); }
+.e2-cc h2 { font-weight: 900; font-size: clamp(36px, 5.6cqw, 80px); line-height: .98; letter-spacing: -.015em; text-wrap: balance; }
+
+/* Tarjetas */
+.sueltas { display: grid; gap: clamp(10px, 1.4cqw, 16px); }
+.e4-dos { grid-template-columns: 1.2fr 1fr; }
+.tele { display: block; width: clamp(110px, 11cqw, 150px); height: auto; margin-bottom: 4px; }
+.doc { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(20px, 3.4cqw, 48px); align-items: start; }
+.doc-a { display: grid; gap: 14px; align-content: start; }
+.doc-lista { list-style: none; margin: 0; padding: 0; display: grid; }
+.doc-lista li + li { border-top: 2px solid var(--calle); }
+.doc-lista a { display: grid; gap: 4px; padding: 14px 0; text-decoration: none; }
+.doc-lista b { font-weight: 800; font-size: clamp(20px, 2.1cqw, 26px); line-height: 1.1; }
+.doc-lista b::after { content: " →"; }
+.doc-lista span { font-size: 15px; line-height: 1.45; }
+
+/* Quiénes juegan */
+.reparto { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr); gap: clamp(24px, 5cqw, 72px); align-items: center; margin-top: clamp(48px, 8cqw, 112px); padding-top: clamp(24px, 3cqw, 40px); border-top: 6px solid var(--tinta); }
+.rep-a { display: grid; gap: 18px; align-content: start; }
+.rep-a h2 { font-weight: 900; font-size: clamp(40px, 6cqw, 88px); line-height: .98; letter-spacing: -.015em; }
+.rep-b { display: grid; place-items: center; padding-top: clamp(24px, 6cqw, 80px); }
+.portada .mesa { position: relative; width: 100%; max-width: 600px; aspect-ratio: 1 / 0.82; margin-inline: auto; }
+.portada .mesa > div { position: absolute; }
+.cae > div { transform: rotate(var(--r)); animation: cae 12s cubic-bezier(.2, .7, .3, 1) infinite both; }
+.cae > div:nth-child(2) { animation-delay: .6s; } .cae > div:nth-child(3) { animation-delay: 1.2s; } .cae > div:nth-child(4) { animation-delay: 1.8s; } .cae > div:nth-child(5) { animation-delay: 2.4s; } .cae > div:nth-child(6) { animation-delay: 3s; }
+@keyframes cae { 0% { opacity: 0; transform: translateY(-26%) rotate(calc(var(--r) * 3)) scale(1.12); } 6% { opacity: 1; transform: rotate(var(--r)); } 84% { opacity: 1; transform: rotate(var(--r)); } 92%, 100% { opacity: 0; transform: rotate(var(--r)); } }
+.en-pausa .cae > div, .en-pausa .tubo::before, .en-pausa .tubo::after, .en-pausa .pant .ruido { animation-play-state: paused; }
+/* Sin JS no hay botón de pausa: la mesa queda armada y quietos el tubo y la nieve. */
+html:not(.js) .portada .cae > div, html:not(.js) .portada .tubo::before, html:not(.js) .portada .tubo::after, html:not(.js) .portada .pant .ruido { animation: none; }
+html:not(.js) .portada .canales { display: none; }
+
+
+
+/* ---------- móvil ---------- */
+@container maq (max-width: 700px) {
+  .hA { aspect-ratio: 3 / 4; min-height: 0; }
+  .hA .pill { right: 16px; top: 16px; }
+  .hA h1 { font-size: 8.4cqw; }
+  .h-centro { padding: 20cqw 16px 0; }
+  .canales { grid-template-columns: repeat(9, max(24px, 7.4cqw)); gap: max(3px, 1.4cqw); }
+  .e2-cc { grid-template-columns: 1fr; }
+  .e2-cc h2 { font-size: 10.6cqw; }
+  .e4-vivo { grid-template-columns: 1fr; }
+  .e4-vivo > .mz { margin-left: 0; margin-top: -10cqw; box-shadow: 0 -10px 28px rgb(0 0 0 / .45); }
+  .frottage { aspect-ratio: 4 / 3; height: auto; }
+  .frottage.capa { height: 100%; }
+  .e4-dos { grid-template-columns: 1fr; }
+  .doc { grid-template-columns: 1fr; }
+  .reparto { grid-template-columns: 1fr; }
+  .rep-a h2 { font-size: 12cqw; }
+}
+
+/* Sin movimiento: cartas quietas y armadas (sin animación quedan con opacidad 1 en su lugar). */
+@media (prefers-reduced-motion: reduce) {
+  .portada *, .portada *::before, .portada *::after { animation: none !important; transition: none !important; }
+}

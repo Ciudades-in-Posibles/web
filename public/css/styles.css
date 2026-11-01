@@ -1,0 +1,1004 @@
+/* ==========================================================================
+   Ciudades(In)Posibles — Mosaico
+   Paleta espectral sobre negro. Los bloques de color son manzanas; el negro,
+   las calles. Las piezas son recortes de cartulina de color plano, sin
+   sombra ni textura; solo el fondo lleva el barrido y la estática del tubo.
+   Tipografía: Gabarito (400–900, sin eje de ancho) e IBM Plex Mono. Recursos: mosaico de bloques (manzanas como células,
+   calles curvas), cortes diagonales, recorte circular y grano de
+   fragmentos pequeños. Sin mapas ni diagramas.
+   Regla de color: el color va de fondo y el texto encima es negro (o crema
+   sobre vinotinto y violeta). Nunca texto de color sobre color.
+   ========================================================================== */
+
+/* --- Fuentes (woff2 locales, subconjunto latino, OFL) -------------------- */
+@font-face {
+  font-family: "Gabarito";
+  src: url("/assets/fonts/gabarito-var.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/assets/fonts/plex-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/assets/fonts/plex-mono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Calles y crema: fijos en ambos temas (tinta sobre los bloques, calles del mosaico) */
+  --calle: #0b0b0c;
+  --crema: #ffffbf;
+
+  /* Tema (oscuro por defecto; el claro está en «Tema claro», más abajo) */
+  --fondo: #2a2a2d;          /* grafito; las calles siguen en #0b0b0c. Crema encima: 13.8:1 */
+  --tinta: var(--crema);
+  --tinta-2: #c9c9a6;        /* texto secundario: 8.4:1 */
+  --superficie: #353539;     /* apenas distinta del fondo; tinta encima 11.8:1 */
+  --papel: #f5f3ea;          /* papel de cartas y paneles; fijo en ambos temas */
+  --filete: #636369;         /* contorno fino de cartas y hojas sobre el fondo */
+  /* Textura de fondo «Barrido + estática»: barrido de 1 px cada 4 px (2 %) y
+     grano de televisor entre canales (≈1,75 %). Solo en el fondo de página. */
+  --fondo-textura: repeating-linear-gradient(to bottom, rgb(255 255 191 / .02) 0 1px, transparent 1px 4px), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1.0 0 0 0 0 1.0 0 0 0 0 0.749 0.035 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E");
+  --fondo-textura-tam: auto, 240px 240px;
+
+  /* Paleta espectral. Texto encima: negro, salvo vinotinto y violeta (crema). */
+  --vinotinto: #9e0142;      /* crema 8.0 */
+  --rojo: #da4a57;           /* negro 4.8 (rojo espectral aclarado para AA) */
+  --naranja: #f46d43;        /* negro 6.7 */
+  --naranja-claro: #fdae61;  /* negro 10.7 */
+  --amarillo: #fed24f;       /* negro 13.6 */
+  --lima: #e6f598;           /* negro 16.8 */
+  --menta: #abdda4;          /* negro 12.8 */
+  --turquesa: #66c2a5;       /* negro 9.2 */
+  --azul: #3288bd;           /* negro 5.1 */
+  --violeta: #6a5bb0;        /* crema 5.4 */
+
+  /* Acentos (filetes y marcas sobre el fondo, ≥ 3:1). En claro se oscurecen. */
+  --acento-naranja: var(--naranja);
+  --acento-naranja-claro: var(--naranja-claro);
+  --acento-amarillo: var(--amarillo);
+  --acento-crema: var(--crema);
+  --acento-lima: var(--lima);
+  --acento-menta: var(--menta);
+  --acento-turquesa: var(--turquesa);
+
+  /* Color de la sección (lo fijan las clases .c-*) */
+  --c: var(--amarillo);      /* fondo del bloque */
+  --c-tinta: var(--calle);   /* texto sobre el bloque */
+  --c-acento: var(--acento-amarillo); /* filetes y marcas sobre el fondo (≥ 3:1) */
+
+  /* Tipografía */
+  --font-titular: "Gabarito", system-ui, sans-serif;
+  --font-lectura: "Gabarito", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --fs-mono: 0.8125rem;
+  --fs-0: 1rem;
+  --fs-1: 1.125rem;
+  /* Escala para Gabarito (más ancha que la tipografía anterior): razón ≈1.25
+     en escritorio, más corta en móvil. */
+  --fs-2: clamp(1.25rem, 1.15rem + 0.4vw, 1.375rem);  /* 20–22: extracto, h3 */
+  --fs-3: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);    /* 24–30: h2 de lectura */
+  --fs-4: clamp(2rem, 1.3rem + 2.8vw, 3.5rem);        /* 32–56: titular de sección */
+  --fs-5: clamp(2.5rem, 0.9rem + 5.6vw, 6rem);        /* 40–96: titular de página */
+  --lh-lectura: 1.6;
+
+  /* Espaciado */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2.5rem;
+  --sp-6: 4rem;
+  --sp-7: 6rem;
+
+  /* Mosaico */
+  --calle-ancho: 6px;                             /* calle entre bloques */
+  --avenida: clamp(2rem, 1rem + 3vw, 3rem);       /* avenida entre secciones */
+  --corte: clamp(1.5rem, 0.8rem + 3vw, 3.5rem);   /* corte diagonal de bloques grandes */
+  --pad-bloque: clamp(1.25rem, 0.6rem + 3vw, 3.5rem);
+  /* Células: esquinas redondeadas irregulares para tarjetas y pasos. */
+  --celula-1: 2.2rem 1.2rem 2.6rem 1.4rem / 1.6rem 2.4rem 1.3rem 2.8rem;
+  --celula-2: 1.3rem 2.6rem 1.5rem 2.4rem / 2.6rem 1.4rem 2.8rem 1.2rem;
+  --celula-3: 2.8rem 1.5rem 2rem 1.1rem / 1.4rem 2.2rem 1.6rem 2.6rem;
+  --celula-4: 1.6rem 2.8rem 2.2rem 1.3rem / 2.2rem 1.3rem 2.6rem 1.8rem;
+
+  /* Medidas */
+  --ancho-max: 72rem;
+  --ancho-lectura: 38rem;
+}
+
+/* Un color por sección. */
+.c-vinotinto     { --c: var(--vinotinto);     --c-tinta: var(--crema); --c-acento: var(--rojo); }
+.c-violeta       { --c: var(--violeta);       --c-tinta: var(--crema); --c-acento: var(--azul); }
+.c-rojo          { --c: var(--rojo);          --c-tinta: var(--calle); --c-acento: var(--rojo); }
+.c-naranja       { --c: var(--naranja);       --c-tinta: var(--calle); --c-acento: var(--acento-naranja); }
+.c-naranja-claro { --c: var(--naranja-claro); --c-tinta: var(--calle); --c-acento: var(--acento-naranja-claro); }
+.c-amarillo      { --c: var(--amarillo);      --c-tinta: var(--calle); --c-acento: var(--acento-amarillo); }
+.c-crema         { --c: var(--crema);         --c-tinta: var(--calle); --c-acento: var(--acento-crema); }
+.c-lima          { --c: var(--lima);          --c-tinta: var(--calle); --c-acento: var(--acento-lima); }
+.c-menta         { --c: var(--menta);         --c-tinta: var(--calle); --c-acento: var(--acento-menta); }
+.c-turquesa      { --c: var(--turquesa);      --c-tinta: var(--calle); --c-acento: var(--acento-turquesa); }
+.c-azul          { --c: var(--azul);          --c-tinta: var(--calle); --c-acento: var(--azul); }
+
+/* --- Tema claro ---------------------------------------------------------
+   Papel cálido y tinta negra. Se activa con el sistema o con el botón
+   (data-tema en <html>). Los dos bloques deben quedar iguales. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="oscuro"]) {
+    color-scheme: light;
+    --fondo: #f5f3ea;          /* tinta encima: 17.7:1 */
+    --tinta: var(--calle);
+    --tinta-2: #4f4e48;        /* 7.5:1 */
+    --superficie: #e9e6da;     /* tinta encima 15.7:1 */
+    --filete: #a9a695;
+    --fondo-textura: repeating-linear-gradient(to bottom, rgb(11 11 12 / .02) 0 1px, transparent 1px 4px), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.043 0 0 0 0 0.043 0 0 0 0 0.047 0.035 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E");
+    --acento-naranja: #e05b30;       /* 3.3:1 sobre papel */
+    --acento-naranja-claro: #be741f;
+    --acento-amarillo: #9e822a;
+    --acento-crema: #89884d;
+    --acento-lima: #808c2f;
+    --acento-menta: #62915c;
+    --acento-turquesa: #349479;
+  }
+}
+:root[data-tema="claro"] {
+  color-scheme: light;
+  --fondo: #f5f3ea;
+  --tinta: var(--calle);
+  --tinta-2: #4f4e48;
+  --superficie: #e9e6da;
+  --filete: #a9a695;
+  --fondo-textura: repeating-linear-gradient(to bottom, rgb(11 11 12 / .02) 0 1px, transparent 1px 4px), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.043 0 0 0 0 0.043 0 0 0 0 0.047 0.035 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E");
+  --acento-naranja: #e05b30;
+  --acento-naranja-claro: #be741f;
+  --acento-amarillo: #9e822a;
+  --acento-crema: #89884d;
+  --acento-lima: #808c2f;
+  --acento-menta: #62915c;
+  --acento-turquesa: #349479;
+}
+
+/* --- Reset mínimo ------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body, h1, h2, h3, h4, p, figure, blockquote, ul, ol, dl, dd { margin: 0; }
+img, svg { max-width: 100%; height: auto; display: block; }
+
+body {
+  background-color: var(--fondo);
+  background-image: var(--fondo-textura);
+  background-size: var(--fondo-textura-tam);
+  color: var(--tinta);
+  font-family: var(--font-lectura);
+  font-size: var(--fs-0);
+  line-height: 1.5;
+}
+
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-thickness: 3px; }
+
+/* Foco: la tinta del tema; dentro de un bloque, el color de su texto. */
+:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--ancho-max);
+  margin-inline: auto;
+  padding-inline: var(--sp-3);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: var(--sp-3);
+  top: -100%;
+  background: var(--tinta);
+  color: var(--fondo);
+  padding: var(--sp-2) var(--sp-3);
+  z-index: 10;
+}
+.skip:focus { top: var(--sp-2); }
+.skip:focus-visible { outline-color: var(--acento-naranja); }
+
+/* Etiqueta mono: la voz de los datos, numerales y créditos. */
+.dato,
+.nav-list,
+.nav-toggle,
+.etiquetas li,
+.ficha-datos dt,
+.dialogo .con,
+.cita footer, .cita figcaption,
+.glosario dd .ver,
+.autoria {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fs-mono);
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+/* --- Marca -------------------------------------------------------------- */
+.brand {
+  font-family: var(--font-titular);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: normal;
+}
+/* Una línea; si no cabe, «Ciudades» arriba y «(In)Posibles» pegado debajo
+   (marcado: Ciudades<wbr><span class="in-pos">…</span>). */
+.in-pos { white-space: nowrap; }
+/* «(In)»: una manzana del color de la sección. */
+.in {
+  display: inline-block;
+  background: var(--c);
+  color: var(--c-tinta);
+  padding: 0.04em 0.14em 0.08em;
+  margin-inline: 0.06em;
+  font-weight: 800;
+  text-decoration: none;
+  line-height: 1;
+}
+
+/* En tarjetas y bloques donde el fondo ya es var(--c), el resalte se invierte:
+   bloque con la tinta y texto del color de la sección. */
+.tarjeta .in,
+.page-head .in,
+.bloque .in,
+.dossier article > header .in {
+  background: var(--c-tinta);
+  color: var(--c);
+}
+
+/* --- Cabecera y navegación --------------------------------------------- */
+.site-header { position: relative; padding-bottom: 12px; }
+/* Grano: fragmentos de color bajo la cabecera, sin texto encima. */
+.site-header::after,
+.site-footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: url("/assets/img/grano.svg") 0 0 / 240px 12px repeat-x;
+}
+.site-header::after { bottom: 0; }
+
+.header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
+  padding-block: var(--sp-3);
+}
+.nav-toggle {
+  text-transform: uppercase;
+  min-height: 44px;
+  background: var(--tinta);
+  color: var(--fondo);
+  border: 0;
+  padding: 0 var(--sp-3);
+  cursor: pointer;
+}
+.nav-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-4);
+  text-transform: uppercase;
+}
+.nav-list a { text-decoration: none; }
+.nav-list a:not(.btn):hover { text-decoration: underline; text-decoration-thickness: 2px; }
+/* Página actual: un bloque del color de la sección bajo la palabra. */
+.nav-list a:not(.btn)[aria-current="page"] {
+  background: linear-gradient(var(--c-acento), var(--c-acento)) no-repeat 0 100% / 100% 0.3125rem;
+  padding-bottom: 0.25rem;
+}
+.nav-list .btn[aria-current="page"] {
+  outline: 2px solid var(--tinta);
+  outline-offset: 2px;
+}
+.nav-list .btn {
+  --c: var(--naranja-claro);
+  --c-tinta: var(--calle);
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding-inline: var(--sp-3);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  background: var(--c);
+  color: var(--c-tinta);
+  border: 2px solid var(--c);
+  font-family: var(--font-titular);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  padding: var(--sp-2) var(--sp-4);
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.btn:hover { background: var(--tinta); border-color: var(--tinta); color: var(--fondo); }
+.btn:active { transform: translateY(1px); }
+.btn--secundario { background: transparent; border-color: var(--tinta); color: var(--tinta); }
+
+/* Con JS, en móvil la navegación se colapsa tras el botón. */
+.js #nav-principal { flex-basis: 100%; display: none; }
+.js #nav-principal.is-open { display: block; }
+.js .nav-toggle { display: inline-block; } /* visible desde el primer pintado, sin esperar a main.js */
+.js .nav-list { flex-direction: column; align-items: stretch; gap: 0; padding-block: var(--sp-2); }
+.js .nav-list a:not(.btn) { display: block; padding-block: 0.8125rem; } /* área táctil ≥ 44px */
+.js .nav-list a:not(.btn)[aria-current="page"] { background-size: 2.5rem 0.3125rem; }
+.js .nav-list .btn { display: flex; margin-top: var(--sp-2); }
+
+@media (min-width: 48rem) {
+  .js .nav-toggle { display: none; }
+  .js #nav-principal { display: block; flex-basis: auto; }
+  .js .nav-list { flex-direction: row; align-items: center; gap: var(--sp-2) var(--sp-4); padding-block: 0; }
+  .js .nav-list a:not(.btn) { display: inline; padding-block: 0 0.25rem; }
+  .js .nav-list a:not(.btn)[aria-current="page"] { background-size: 100% 0.3125rem; }
+  .js .nav-list .btn { display: inline-flex; margin-top: 0; }
+}
+
+/* --- Manzanas ------------------------------------------------------------ */
+/* Bloques grandes de color plano. Las cabeceras de página tienen una esquina
+   cortada por una avenida diagonal; el clip-path recorta su contorno de foco,
+   así que el foco se dibuja en los hijos, siempre lejos de la esquina cortada.
+   Los demás bloques son células de esquinas irregulares, como las tarjetas. */
+.bloque,
+.page-head,
+.dossier article > header {
+  --marca: currentColor;
+  position: relative;
+  background: var(--c);
+  color: var(--c-tinta);
+  padding: var(--pad-bloque);
+}
+.page-head,
+.dossier article > header {
+  padding-bottom: calc(var(--pad-bloque) + var(--corte) * 0.5);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--corte)), calc(100% - var(--corte)) 100%, 0 100%);
+}
+.bloque { border-radius: var(--celula-1); }
+.bloque :focus-visible,
+.page-head :focus-visible,
+.dossier article > header :focus-visible,
+.tarjeta :focus-visible { outline-color: var(--c-tinta); }
+.bloque .btn,
+.page-head .btn { background: var(--calle); border-color: var(--calle); color: var(--crema); }
+.bloque .btn:hover,
+.page-head .btn:hover { background: transparent; color: var(--c-tinta); border-color: var(--c-tinta); }
+
+/* Secciones: separadas por avenidas; las de color, alineadas a la retícula. */
+.seccion { margin-top: var(--avenida); }
+.seccion.bloque {
+  width: auto;
+  max-width: calc(var(--ancho-max) - 2 * var(--sp-3));
+  margin-inline: max(var(--sp-3), (100% - var(--ancho-max)) / 2 + var(--sp-3));
+}
+/* Dentro de un .wrap, la manzana ya está en la retícula. */
+.wrap > .seccion.bloque { max-width: none; margin-inline: 0; }
+/* Dos manzanas seguidas cambian de forma para que no se repitan. */
+.seccion.bloque + .seccion.bloque { border-radius: var(--celula-3); }
+
+/* --- Pie ---------------------------------------------------------------- */
+.site-footer {
+  position: relative;
+  margin-top: var(--sp-7);
+  padding-block: calc(12px + var(--sp-5)) var(--sp-5);
+  font-size: 0.9375rem;
+  color: var(--tinta-2);
+}
+.site-footer::before { top: 0; }
+.site-footer .brand { font-size: 2rem; color: var(--tinta); }
+.footer-inner { display: grid; gap: var(--sp-4); }
+.footer-inner p + p { margin-top: var(--sp-2); }
+@media (min-width: 48rem) {
+  .footer-inner { grid-template-columns: 1fr auto; align-items: center; }
+}
+.footer-credito {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  font-size: 0.875rem;
+  color: var(--tinta-2);
+}
+.footer-credito a {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+.footer-credito a:focus-visible {
+  outline: 2px solid var(--tinta);
+  outline-offset: 3px;
+}
+.footer-logo {
+  height: 2.75rem;
+  width: auto;
+  display: block;
+}
+.footer-logo--claro { display: none; }
+.footer-logo--oscuro { display: block; }
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="oscuro"]) .footer-logo--oscuro { display: none; }
+  :root:not([data-tema="oscuro"]) .footer-logo--claro { display: block; }
+}
+:root[data-tema="claro"] .footer-logo--oscuro { display: none; }
+:root[data-tema="claro"] .footer-logo--claro { display: block; }
+:root[data-tema="oscuro"] .footer-logo--claro { display: none; }
+:root[data-tema="oscuro"] .footer-logo--oscuro { display: block; }
+
+/* --- Tipografía de contenido ------------------------------------------- */
+/* Sin kickers: el titular va solo. Si hace falta un dato (categoría, fecha,
+   ruta), va debajo del titular, en mono. */
+.dato { text-transform: uppercase; margin-top: var(--sp-2); }
+.tarjeta .dato { margin-top: 0; }
+
+.titulo {
+  font-family: var(--font-titular);
+  font-size: var(--fs-4);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  margin-top: var(--sp-3);
+  text-wrap: balance;
+}
+.extracto {
+  font-size: var(--fs-2);
+  line-height: 1.4;
+  margin-top: var(--sp-4);
+  max-width: var(--ancho-lectura);
+}
+.autoria { margin-top: var(--sp-3); text-transform: uppercase; }
+
+/* Resaltado: una sola palabra del titular («co-crear») se vuelve manzana
+   vinotinto con crema; dentro de un bloque vinotinto, va en calle. */
+.resalte,
+.res {
+  display: inline-block;
+  white-space: nowrap;
+  background: var(--vinotinto);
+  color: var(--crema);
+  line-height: 0.98;
+  padding: 0.02em 0.12em 0.06em;
+  margin-block: 0.1em; /* que la manzana no pise la línea de abajo */
+  border-radius: 0.1em 0.05em 0.12em 0.06em;
+}
+.c-vinotinto .resalte,
+.c-vinotinto .res { background: var(--calle); }
+
+.prosa {
+  font-size: var(--fs-1);
+  line-height: var(--lh-lectura);
+  max-width: var(--ancho-lectura);
+}
+main > .wrap > .prosa:not(.pregunta),
+main > article.wrap > .prosa,
+.dossier article > .prosa { margin-top: var(--avenida); }
+.prosa > * + * { margin-top: var(--sp-4); }
+.prosa h2 {
+  font-family: var(--font-titular);
+  font-size: var(--fs-3);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-top: var(--sp-6);
+  text-wrap: balance;
+}
+/* Una manzana del color de la sección sobre cada apartado. */
+.prosa h2::before {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 0.5rem;
+  margin-bottom: var(--sp-3);
+  background: var(--c-acento);
+  box-shadow: calc(3rem + var(--calle-ancho)) 0 0 -0.125rem var(--c-acento);
+}
+.prosa > h2:first-child, .prosa > .visually-hidden:first-child + * { margin-top: 0; }
+.prosa h3 {
+  font-family: var(--font-titular);
+  font-size: var(--fs-2);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-top: var(--sp-5);
+}
+.prosa h2 + *, .prosa h3 + * { margin-top: var(--sp-3); }
+.prosa ul, .prosa ol { padding-left: 1.25em; }
+.prosa li + li { margin-top: var(--sp-2); }
+.prosa li::marker { color: var(--c-acento); font-family: var(--font-mono); font-weight: 500; }
+.prosa strong { font-weight: 700; }
+.prosa u {
+  text-decoration-color: var(--c-acento);
+  text-decoration-thickness: 0.3em;
+  text-underline-offset: 0.05em;
+  text-decoration-skip-ink: none;
+}
+
+/* La pregunta, en la manzana naranja de la portada. */
+.pregunta {
+  font-family: var(--font-titular);
+  font-weight: 800;
+  font-size: var(--fs-4);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  max-width: 20ch;
+  text-wrap: balance;
+}
+.cita {
+  font-size: var(--fs-2);
+  font-weight: 400;
+  line-height: 1.4;
+  border-left: 0.5rem solid var(--c-acento);
+  padding-left: var(--sp-4);
+}
+.cita footer, .cita figcaption { margin-top: var(--sp-3); color: var(--tinta-2); }
+
+/* --- Secciones y cabeceras de página ------------------------------------ */
+main { padding-top: var(--sp-5); } /* la portada lo anula: su hero va pegado a la cabecera */
+.page-head .titulo { font-size: var(--fs-5); max-width: 16ch; }
+/* Sin rótulo encima, el titular abre el bloque sin margen. */
+.titulo:first-child { margin-top: 0; }
+.seccion-titulo {
+  font-family: var(--font-titular);
+  font-size: var(--fs-4);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  max-width: 20ch;
+  text-wrap: balance;
+}
+.seccion-intro {
+  margin-top: var(--sp-3);
+  max-width: var(--ancho-lectura);
+  font-size: var(--fs-1);
+}
+.seccion:not(.bloque) .seccion-intro { color: var(--tinta-2); }
+.seccion .pregunta + .seccion-intro { margin-top: var(--sp-4); }
+/* En pantallas muy angostas, una palabra larga del titular se divide antes que desbordar. */
+@media (max-width: 22.5rem) {
+  .titulo, .seccion-titulo, .pregunta { hyphens: auto; }
+}
+
+/* --- Portada ------------------------------------------------------------ */
+.hero {
+  display: grid;
+  gap: var(--sp-5);
+  align-items: center;
+  padding-block: var(--sp-5) var(--sp-4);
+}
+.hero .titulo { font-size: var(--fs-5); max-width: 11ch; }
+.hero .extracto { max-width: 40rem; color: var(--tinta); }
+.hero .extracto strong { font-weight: 700; }
+.hero .acciones { margin-top: var(--sp-5); display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+/* Recorte circular: mosaico abstracto de manzanas, sin mapa. */
+.hero-mosaico {
+  width: min(100%, 24rem);
+  justify-self: center;
+}
+@media (min-width: 64rem) {
+  .hero { grid-template-columns: 1.25fr 1fr; padding-block: var(--sp-6) var(--sp-5); }
+  .hero-mosaico { width: 100%; max-width: 34rem; justify-self: end; }
+}
+
+/* --- Tarjetas: mosaico de manzanas --------------------------------------- */
+/* Las manzanas son células de esquinas irregulares; las calles negras curvan
+   entre ellas. Cuatro formas que se alternan para que las vecinas no se repitan. */
+.tarjetas {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--calle-ancho);
+  margin-top: var(--sp-5);
+}
+@media (min-width: 40rem) { .tarjetas { grid-template-columns: repeat(2, 1fr); } }
+/* A dos columnas, la última manzana sin pareja ocupa toda la fila. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .tarjetas > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+@media (min-width: 64rem) {
+  .tarjetas--3 { grid-template-columns: repeat(3, 1fr); }
+  .tarjetas--mosaico .bloque--ancho { grid-column: span 2; }
+  .tarjetas--mosaico .bloque--alto { grid-row: span 2; }
+}
+
+.tarjeta {
+  position: relative;
+  background: var(--c);
+  color: var(--c-tinta);
+  padding: var(--sp-4);
+  min-height: 11rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  border-radius: var(--celula-1);
+}
+.tarjeta:nth-child(4n+2) { border-radius: var(--celula-2); }
+.tarjeta:nth-child(4n+3) { border-radius: var(--celula-3); }
+.tarjeta:nth-child(4n) { border-radius: var(--celula-4); }
+/* Con el foco dentro, el contorno sigue la forma de la célula. */
+.tarjeta:focus-within { outline: 3px solid var(--tinta); outline-offset: 3px; }
+
+.tarjeta h3 {
+  font-family: var(--font-titular);
+  font-size: var(--fs-2);
+  font-weight: 700;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.tarjeta h3 a { text-decoration: none; }
+.tarjeta:hover h3 a { text-decoration: underline; text-decoration-thickness: 2px; }
+/* Toda la tarjeta es clicable a través del enlace del título. */
+.tarjeta h3 a::after { content: ""; position: absolute; inset: 0; }
+.tarjeta p { line-height: 1.45; }
+.tarjeta .indicador {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fs-mono);
+  letter-spacing: 0.06em;
+  margin-bottom: auto;
+  padding-bottom: var(--sp-4);
+}
+.bloque--ancho h3 { font-size: var(--fs-3); }
+/* Tarjeta en espera: grano sobre la manzana. */
+.tarjeta--marcador {
+  background: url("/assets/img/grano.svg") 0 0 / 240px 12px repeat-x, var(--c);
+  padding-top: calc(var(--sp-4) + 12px);
+}
+
+.etiquetas { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: auto; padding-top: var(--sp-2); }
+.etiquetas li {
+  border: 1px solid currentColor;
+  padding: 0.125rem var(--sp-2);
+}
+
+/* --- Dossier: barra lateral y navegación entre coordenadas -------------- */
+.dossier {
+  display: grid;
+  gap: var(--sp-4);
+}
+.dossier-aside {
+  display: grid;
+  grid-template-columns: 5rem auto;
+  align-items: center;
+  gap: 0 var(--sp-3);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fs-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+}
+.dossier-mosaico { width: 5rem; grid-row: span 2; }
+.dossier-aside .indicador {
+  justify-self: start;
+  align-self: end;
+  background: var(--c);
+  color: var(--c-tinta);
+  font-family: var(--font-titular);
+  font-size: var(--fs-3);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  padding: 0.1em 0.25em;
+}
+.dossier-aside > span:not(.indicador) { align-self: start; margin-top: var(--sp-1); }
+.dossier-aside nav { grid-column: 1 / -1; }
+.dossier-aside nav ol { list-style: none; padding: 0; margin-top: var(--sp-4); text-transform: none; letter-spacing: 0; font-size: 0.875rem; color: var(--tinta); }
+.dossier-aside nav li + li { margin-top: 2px; }
+.dossier-aside nav a { display: block; padding: 0.375rem var(--sp-2); text-decoration: none; }
+.dossier-aside nav a:hover { text-decoration: underline; }
+.dossier-aside nav a[aria-current="page"] { background: var(--c); color: var(--c-tinta); }
+.dossier-aside nav a[aria-current="page"]:focus-visible { outline-color: var(--tinta); }
+
+@media (min-width: 64rem) {
+  .dossier { grid-template-columns: 15rem 1fr; gap: var(--sp-5); }
+  .dossier-aside { position: sticky; top: var(--sp-4); align-self: start; grid-template-columns: 1fr; gap: var(--sp-3); }
+  .dossier-mosaico { width: 12rem; grid-row: auto; }
+  .dossier-aside .indicador { font-size: var(--fs-4); }
+  .dossier-aside > span:not(.indicador) { margin-top: calc(var(--sp-3) * -1 + var(--sp-2)); }
+  .dossier-aside nav ol { margin-top: var(--sp-2); }
+}
+
+.dossier article > header .titulo { font-size: var(--fs-4); max-width: 18ch; }
+.dossier article > figure + header { margin-top: var(--sp-5); }
+
+/* --- Fichas de referencia ----------------------------------------------- */
+.ficha-datos {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--sp-2) var(--sp-4);
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-4);
+  border-top: 2px solid currentColor;
+  font-size: 0.9375rem;
+  max-width: 48rem;
+}
+.ficha-datos dt { text-transform: uppercase; padding-top: 0.2em; }
+@media (max-width: 30rem) {
+  .ficha-datos { grid-template-columns: 1fr; gap: 0; }
+  .ficha-datos dd + dt { margin-top: var(--sp-3); }
+}
+.dialogo { list-style: none; padding: 0 !important; }
+.dialogo > li {
+  border-left: 0.5rem solid var(--c-acento);
+  padding-left: var(--sp-4);
+}
+.dialogo > li + li { margin-top: var(--sp-5); }
+.dialogo .con { text-transform: uppercase; color: var(--tinta-2); }
+.dialogo .cita { border-left: 0; padding-left: 0; }
+
+.aviso {
+  background: var(--c);
+  color: var(--c-tinta);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: 0.9375rem;
+  max-width: var(--ancho-lectura);
+}
+
+/* --- Glosario ----------------------------------------------------------- */
+.glosario dt {
+  font-family: var(--font-titular);
+  font-size: var(--fs-2);
+  font-weight: 700;
+  margin-top: var(--sp-5);
+  scroll-margin-top: var(--sp-4);
+}
+.glosario dt::before {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-right: 0.4em;
+  background: var(--c-acento);
+  vertical-align: 0.1em;
+}
+.glosario dt:first-child { margin-top: 0; }
+.glosario dt:target { background: var(--c); color: var(--c-tinta); box-shadow: 0 0 0 0.25em var(--c); }
+.glosario dt:target::before { background: currentColor; }
+.glosario dd { margin-top: var(--sp-2); }
+.glosario dd .ver { margin-top: var(--sp-2); color: var(--tinta-2); }
+.glosario dd .ver a { color: var(--tinta); }
+.indice-letras { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+
+/* --- Botón de tema flotante --------------------------------------------
+   Una píldora abajo a la derecha: luna (oscuro) y sol (claro). El tema
+   activo es una manzana del color de la sección. */
+.tema-toggle {
+  position: fixed;
+  right: max(var(--sp-3), env(safe-area-inset-right));
+  bottom: max(var(--sp-3), env(safe-area-inset-bottom));
+  z-index: 5;
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--fondo);
+  color: var(--tinta);
+  border: 2px solid var(--tinta);
+  cursor: pointer;
+}
+.tema-toggle[hidden] { display: none; }
+.tema-icono {
+  width: 2.25rem;  /* con el relleno y el borde, el botón mide 46 px de alto */
+  height: 2.25rem;
+  padding: 0.5rem;
+}
+.tema-toggle[aria-pressed="false"] .tema-icono--oscuro,
+.tema-toggle[aria-pressed="true"] .tema-icono--claro {
+  background: var(--c);
+  color: var(--c-tinta);
+}
+.tema-toggle:hover { outline: 2px solid var(--tinta); outline-offset: 2px; }
+.tema-toggle:focus-visible { outline: 3px solid var(--tinta); outline-offset: 3px; }
+/* Que el botón no tape el final del pie. */
+.site-footer { padding-bottom: calc(var(--sp-5) + 3.5rem); }
+@media print {
+  .tema-toggle { display: none !important; }
+  body { background-image: none; } /* fotocopia limpia */
+}
+
+/* --- Movimiento --------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* --- Utilidades --------------------------------------------------------- */
+.mt-4 { margin-top: var(--sp-4); }
+.mt-5 { margin-top: var(--sp-5); }
+
+/* --- Desplegables de contenido (progressive disclosure) ----------------- */
+details.desplegable {
+  margin-top: var(--sp-4);
+  border-top: 1px solid currentColor;
+  padding-top: var(--sp-4);
+}
+details.desplegable summary {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--calle);
+  color: var(--crema);
+  border: 1px solid var(--calle);
+  list-style: none;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+details.desplegable summary::-webkit-details-marker,
+details.desplegable summary::marker {
+  display: none;
+}
+details.desplegable summary:hover,
+details.desplegable summary:focus-visible {
+  background: transparent;
+  color: var(--c-tinta);
+  border-color: var(--c-tinta);
+}
+details.desplegable .desplegable-icono {
+  display: inline-block;
+  font-style: normal;
+  transition: transform 0.2s ease;
+}
+details.desplegable[open] .desplegable-icono {
+  transform: rotate(180deg);
+}
+details.desplegable .desplegable-contenido {
+  margin-top: var(--sp-4);
+}
+
+/* --- Tabla comparativa: manzanas sobre la retícula de calles -------------- */
+.tabla-desplazable {
+  overflow-x: auto;
+  margin-top: var(--sp-4);
+}
+.tabla-desplazable:focus-visible { outline: 3px solid var(--tinta); outline-offset: 3px; }
+.comparacion {
+  min-width: 56rem;
+  border-collapse: separate;
+  border-spacing: var(--calle-ancho);
+  margin-inline: calc(var(--calle-ancho) * -1);
+  font-size: var(--fs-0);
+  line-height: 1.45;
+}
+.comparacion caption {
+  text-align: left;
+  padding: 0 var(--calle-ancho) var(--sp-3);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fs-mono);
+  letter-spacing: 0.06em;
+  color: var(--tinta-2);
+}
+.comparacion th,
+.comparacion td {
+  padding: var(--sp-3);
+  text-align: left;
+  vertical-align: top;
+}
+.comparacion td { background: var(--superficie); }
+.comparacion thead td { background: transparent; }
+.comparacion thead th {
+  background: var(--c);
+  color: var(--c-tinta);
+  font-family: var(--font-titular);
+  font-size: var(--fs-2);
+  font-weight: 800;
+  line-height: 1.05;
+}
+.comparacion thead th span { display: block; font-size: var(--fs-0); font-weight: 600; }
+.comparacion tbody th {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fs-mono);
+  letter-spacing: 0.06em;
+  color: var(--tinta-2);
+  width: 9rem;
+}
+
+.notas,
+.ver-tambien {
+  margin-top: var(--sp-4);
+  max-width: var(--ancho-lectura);
+  font-size: var(--fs-mono);
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  color: var(--tinta-2);
+}
+.tarjeta sup { line-height: 0; }
+
+/* --- Juego -------------------------------------------------------------- */
+.juego [id] { scroll-margin-top: var(--sp-4); }
+
+/* --- Marco del sitio ------------------------------------------------------
+   Cabecera, contenido y pie viven dentro de un marco con filete fino (.maq),
+   sobre un fondo exterior un tono más oscuro. .maq es el contenedor «maq»
+   de las medidas en cqw. Cabecera y pie siguen el tema (ver --banda-fondo). */
+body { --afuera: #161618; background-color: var(--afuera); }
+@media (prefers-color-scheme: light) { :root:not([data-tema="oscuro"]) body { --afuera: #dcd9cc; } }
+:root[data-tema="claro"] body { --afuera: #dcd9cc; }
+.maq {
+  container: maq / inline-size;
+  width: min(var(--ancho-max), 100% - 32px);
+  margin: clamp(12px, 2vw, 24px) auto;
+  border: 1px solid var(--filete);
+  border-radius: 10px;
+  overflow: clip;
+  background-color: var(--fondo);
+  background-image: var(--fondo-textura);
+  background-size: var(--fondo-textura-tam);
+}
+.maq .wrap { max-width: none; padding-inline: clamp(16px, 4cqw, 48px); }
+/* En pantallas angostas el espacio para el botón de tema queda fuera del marco. */
+@media (max-width: 48rem) { .maq { margin-bottom: calc(24px + 3.5rem); } }
+
+/* Cabecera: el mosaico pequeño es el inicio. */
+/* Bandas de cabecera y pie: negras en el tema oscuro y del mismo color del fondo en el claro.
+   En el claro --banda-marca queda sin valor y la página actual se marca con --c. */
+:root { --banda-fondo: var(--calle); --banda-tinta: var(--crema); --banda-tinta-2: #c9c9a6; --banda-marca: var(--crema); }
+@media (prefers-color-scheme: light) { :root:not([data-tema="oscuro"]) { --banda-fondo: var(--fondo); --banda-tinta: var(--calle); --banda-tinta-2: #4f4e48; --banda-marca: initial; } }
+:root[data-tema="claro"] { --banda-fondo: var(--fondo); --banda-tinta: var(--calle); --banda-tinta-2: #4f4e48; --banda-marca: initial; }
+.site-header { background: var(--banda-fondo); color: var(--banda-tinta); --tinta: var(--banda-tinta); --fondo: var(--banda-fondo); }
+.h-logo { display: block; width: clamp(44px, 4.2cqw, 50px); height: auto; aspect-ratio: 1; border-radius: 50%; background: var(--calle); padding: 3px; }
+.h-logo img { width: 100%; height: 100%; }
+.h-logo:focus-visible { outline-offset: 3px; }
+/* Páginas interiores: el mosaico y, después, la marca de texto en un solo enlace al inicio. */
+.h-inicio { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.h-inicio:focus-visible { outline-offset: 4px; }
+/* La página actual se marca con el color pleno de la sección (crema sobre negro si el color es oscuro). */
+.site-header .nav-list a:not(.btn)[aria-current="page"] { background-image: linear-gradient(var(--c), var(--c)); }
+.c-vinotinto .site-header .nav-list a:not(.btn)[aria-current="page"],
+.c-violeta .site-header .nav-list a:not(.btn)[aria-current="page"] { background-image: linear-gradient(var(--banda-marca, var(--c)), var(--banda-marca, var(--c))); }
+
+/* Pie: banda baja; el logo sigue al tema como la banda. */
+.site-footer { background: var(--banda-fondo); color: var(--banda-tinta-2); --tinta: var(--banda-tinta); --tinta-2: var(--banda-tinta-2); margin-top: clamp(32px, 6cqw, 72px); padding-block: calc(12px + 28px) 32px; }
+.site-footer .brand { font-size: 24px; color: var(--banda-tinta); }
+.footer-inner { gap: 16px 32px; }
+.site-footer :focus-visible { outline-color: var(--banda-tinta); }
+.footer-credito { font-size: .75rem; gap: 6px; }
+.footer-logo { height: 2.125rem; }
+
+/* Cabecera y pie, misma altura: dos bandas iguales que enmarcan la página. En móvil el pie
+   se apila en dos filas y la cabecera conserva su altura. */
+:root { --banda: 129px; }
+@media (min-width: 48rem) {
+  .site-header { min-height: var(--banda); display: grid; align-content: center; }
+  .site-footer { min-height: var(--banda); }
+}

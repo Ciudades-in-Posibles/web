@@ -1,0 +1,20 @@
+{
+  "projects": {
+    "default": "ciudades-in-posibles"
+  },
+  "targets": {
+    "ciudades-in-posibles": {
+      "hosting": {
+        "principal": [
+          "ciudades-in-posibles"
+        ],
+        "cartografo": [
+          "cartografo-ciudadesinposibles"
+        ],
+        "cronista": [
+          "cronista-ciudadesinposibles"
+        ]
+      }
+    }
+  }
+}
