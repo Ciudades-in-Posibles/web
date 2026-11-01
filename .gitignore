@@ -1,12 +1,6 @@
 .DS_Store
-/docs/
 .firebase/
 firebase-debug.log
 *-debug.log
 node_modules/
 .env*
-
-# Fuera de este repo por ahora (respaldo en ~/Desarollo/_respaldos/)
-/cronista/
-/cartografo/
-/functions/

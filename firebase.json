@@ -1,14 +1,4 @@
 {
-  "firestore": [
-    {
-      "database": "cartografo",
-      "rules": "cartografo/firestore.rules"
-    },
-    {
-      "database": "cronista",
-      "rules": "cronista/firestore.rules"
-    }
-  ],
   "hosting": [
     {
       "target": "principal",
@@ -16,8 +6,16 @@
       "cleanUrls": true,
       "trailingSlash": true,
       "redirects": [
-        { "source": "/juego{,/**}", "destination": "/el-juego/", "type": 301 },
-        { "source": "/asistentes{,/**}", "destination": "/cronista/", "type": 301 }
+        {
+          "source": "/juego{,/**}",
+          "destination": "/el-juego/",
+          "type": 301
+        },
+        {
+          "source": "/asistentes{,/**}",
+          "destination": "/cronista/",
+          "type": 301
+        }
       ],
       "ignore": [
         "firebase.json",
@@ -34,52 +32,6 @@
             }
           ]
         }
-      ]
-    },
-    {
-      "target": "cartografo",
-      "public": "cartografo/dist",
-      "cleanUrls": true,
-      "trailingSlash": false,
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    },
-    {
-      "target": "cronista",
-      "public": "cronista/dist",
-      "cleanUrls": true,
-      "trailingSlash": false,
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    }
-  ],
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "*.local"
       ]
     }
   ]

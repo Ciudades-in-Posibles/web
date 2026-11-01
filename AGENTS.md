@@ -4,25 +4,17 @@ Portal de **Ciudades(In)Posibles**, un juego emersivo sobre nuestro derecho a co
 
 ## Repositorio
 
-Este repositorio contiene solo la web. Cronista, Cartógrafo y `functions/` siguen en disco, pero están fuera de git (ver `.gitignore`) y se respaldan en `~/Desarollo/_respaldos/`.
+Este repositorio contiene solo la web: `public/`, `firebase.json` (solo `hosting:principal`), `.firebaserc` y este archivo. Vive en `~/Desarollo/ciudadesinposibles/web/` desde el 1 nov 2026; antes era `~/Desarollo/sociedaddeciudadesinposibles/`.
 
 ```
 public/        portal · https://ciudadesinposibles.net (HTML + CSS + JS vanilla)
-herramientas/  scripts de diseño (mosaico.py genera los SVG del mosaico)
-docs/          fuente del contenido; no se publica ni se versiona
-firebase.json  Hosting y reglas de Firestore
+firebase.json  Hosting del portal (target principal)
 ```
 
-Fuera de git, solo en disco:
-
-```
-cartografo/    app · https://cartografo.ciudadesinposibles.net (React + Vite + Tailwind)
-cronista/      app · https://cronista.ciudadesinposibles.net (React + Vite + Tailwind)
-functions/     Cloud Functions v2 (Node 22) que consultan la IA para las dos apps
-```
+Al lado, en `~/Desarollo/ciudadesinposibles/` y fuera de este repositorio: `cronista/`, `cartografo/` y `functions/` (se publican desde la raíz de esa carpeta, ver su `AGENTS.md`), `docs/` (fuente del contenido, sin publicar ni versionar), `herramientas/` (scripts de diseño: `mosaico.py` genera los SVG del mosaico y `miniatura.html` la `og.png`) y `aplicaciones/` (Transmisor, Visor y Consola, con su propio repo).
 
 - Commits pequeños y descriptivos. GitHub `Ciudades-in-Posibles/web` (`origin`, público), directo en `main` o en ramas cortas.
-- Nunca subas credenciales. Las apps no usan archivos `.env`: la clave de la IA vive en Secret Manager. `cartografo/data/` está en `.gitignore`.
+- Nunca subas credenciales ni correos de administración: el repositorio es público.
 - **Textos:** todo texto nuevo o reescrito se pasa a revisión del equipo antes de aplicarlo.
 
 ## Portal (`public/`)
@@ -33,7 +25,7 @@ functions/     Cloud Functions v2 (Node 22) que consultan la IA para las dos app
 - Página nueva: `<link rel="canonical" href="https://ciudadesinposibles.net/<ruta>/">` y entrada en `sitemap.xml`. Las rutas cambiadas redirigen con 301 desde `firebase.json` (`/juego/` → `/el-juego/`, `/asistentes/` → `/cronista/`).
 - **Caché de 24 h:** si cambias `styles.css` o `main.js`, sube su `?v=N` en todas las páginas (hoy `/css/styles.css?v=33` y `/js/main.js?v=8`; `aparatos.css`, `cartas.css`, `juego.css`, `portada.css`, `juego.js` y `portada.js` llevan su propio `?v=N`).
 - **Contenido:**
-  - El Manifiesto es copia fiel de `docs/Manifiesto/*.md`; cada cambio se hace en los dos lados.
+  - El Manifiesto es copia fiel de `../docs/Manifiesto/*.md`; cada cambio se hace en los dos lados.
   - Las referencias son fichas curadas con citas breves.
   - Coordenadas propias en romano (§ I–V); las del Plan de Cultura se nombran «Coordenada N del Plan».
   - El glosario usa anclas fijas (`/documentacion/glosario/#eep`); crea el `<dt id>` antes de enlazarlo.
@@ -50,31 +42,7 @@ functions/     Cloud Functions v2 (Node 22) que consultan la IA para las dos app
 
 ## Asistentes
 
-Esta sección describe las apps que viven fuera de este repositorio. Se conserva como referencia.
-
-Dispositivos de juego y relato inspirados en Italo Calvino, con vocabulario separado:
-
-- El **Cronista** asiste la partida. Bajo la lente de cada ronda, los equipos co-crean **espacios**, **puntos** y **vecinos** con fotos y voz (de 1 a 3 fotos por espacio y hasta 3 por punto o vecino), los vuelven **cartas** (código `C-NN`) y arman el **mosaico** de la partida, con versiones. «Crónica» es exclusiva del Cronista.
-- El **Cartógrafo** queda como archivo. Sigue publicado para consultar sus cartas y sus relatos cruzados, fuera del portal, y recibe solo correcciones.
-
-Las dos apps comparten comandos: `npm run dev`, `npm test` y `npm run build` (genera `dist/`, lo que se publica). La IA (Gemini 3.8 Flash por OpenRouter) corre en `functions/`: `cronistaDescribirImagen`, `cronistaCrearCarta`, `cartografoCatalogarLoseta` y `cartografoAnalizarTablero`. Las apps las llaman con `httpsCallable` y una sesión de Auth activa. El modelo está fijado en el servidor y la clave vive en Secret Manager (`OPENROUTER_API_KEY`), nunca en el cliente ni en el repositorio. Para cambiarla: `firebase functions:secrets:set OPENROUTER_API_KEY` y `firebase deploy --only functions`.
-
-**Cartógrafo (`cartografo/`):** Firebase Auth con Google y base Firestore `cartografo` (`cartografo/firestore.rules`). En el ticket de la impresora térmica (`src/services/escposFormatter.js`) se escribe sin tildes: `CARTOGRAFO`.
-
-**Cronista (`cronista/`):**
-- Quienes juegan entran solo con el código de la partida (Auth anónimo) y juegan como su equipo. Las fotos se firman con el nombre del equipo. Para volver a un equipo se escribe el código y se toca el equipo en la lista. El administrador entra con Google. El email del administrador está en `firestore.rules` y en `authService.js`, y debe coincidir.
-- Base Firestore `cronista` con `sesiones` (lente y ajustes de IA), `equipos`, `espacios`, `puntos`, `vecinos`, `registros` (fotos de cada elemento), `cartas`, `contadores`, `mosaicos` y `facilitaciones`; solo los miembros de un equipo escriben en sus espacios.
-- Fotos en base64 dentro de cada registro, comprimidas a 1024 px (`src/utils/imagen.js`), sin Storage. Gemini 3.8 Flash las describe (`describirImagen` en `src/config/openrouter.js`).
-- Cada pieza tiene su color y su glifo del manual: espacio amarillo, punto menta y vecino lima (`src/config/elementos.js`). Las tarjetas chicas usan la célula suave `manzana--chica`.
-- Quien juega se mueve con la barra inferior (Espacios, Puntos, Foto, Vecinos y Mosaico), sin botones «Volver». El punto enlaza a su espacio y a sus vecinos; el vecino, a los puntos que cruza.
-- Las listas muestran filas con miniatura (`FilaPieza`). Cada pieza guarda en su documento una `miniatura` de 240 px y menos de 60 KB, que se renueva al subir o borrar fotos. Todas las fotos se ven cuadradas.
-- Se pueden borrar un espacio sin fotos ni puntos, un punto sin fotos ni vecinos y un vecino junto con sus fotos.
-- Quien facilita abre cada partida en su tablero (`TableroPartida`), con la lente, los equipos y sus piezas. Ahí modera: borra fotos y piezas vacías, sin crear ni tomar fotos.
-- **Facilitación invitada:** el administrador crea, cambia o quita desde la partida un enlace `?facilitar=CÓDIGO` (`InvitarFacilitacion`). El código (10 caracteres) es el id de un documento en `facilitaciones` (`{ sessionId }`), que se lee solo por id. Quien lo abre entra con Auth anónimo al tablero en modo `consulta`: ve todo y descarga, sin QR, lente, moderación ni escrituras.
-- **Descargas:** cada foto revisada por el filtro de rostros (`ia.estado === 'listo'`), carta y versión del mosaico tiene «Descargar». El tablero baja toda la partida en un .zip (`src/services/exportarPartida.js`, con `jszip` cargado al usarlo), ordenado por equipo y pieza, con `cronica.csv` de comentarios y descripciones.
-- `npm run dev` usa el puerto 5174.
-
-**Rostros reconocibles:** ninguna app guarda fotos con caras reconocibles de personas reales (se permiten murales, afiches, estatuas y personas lejanas o de espaldas). `src/config/rostros.js` es idéntico en las dos apps: añade en código la instrucción al prompt de sistema y `verificarRostros` rechaza la foto con `RostrosError`, también si falta el campo. El filtro corre en el cliente, así que una escritura directa en Firestore podría saltárselo.
+El Cronista (`/cronista/` enlaza a la app) y el Cartógrafo (archivo) viven en `../cronista/` y `../cartografo/`, con sus funciones en `../functions/`. Su descripción y cómo se publican están en `~/Desarollo/ciudadesinposibles/AGENTS.md`.
 
 ## Desarrollo y despliegue
 
@@ -84,9 +52,9 @@ firebase hosting:channel:deploy <canal>          # vista previa
 firebase deploy --only hosting:principal         # portal en producción
 ```
 
-- Desde este repositorio se publica solo `hosting:principal`. Cronista, Cartógrafo, Firestore y Functions se despliegan desde sus carpetas en disco, fuera de aquí.
+- Desde este repositorio se publica solo `hosting:principal`. Cronista, Cartógrafo, sus reglas de Firestore y sus Functions se publican desde `~/Desarollo/ciudadesinposibles/`; Transmisor, Visor y Consola, desde `aplicaciones/`.
 - Producción solo después de revisión. No agregues servicios de Firebase (Storage, bases nuevas…) sin que se pida.
-- Pendiente para el rediseño: App Check o un límite por usuario en las funciones, porque hoy responden a cualquier cuenta anónima.
+- La clave web de Firebase está restringida por sitio web (Google Cloud → Credenciales). Un dominio nuevo hay que sumarlo ahí.
 - Dominio en Namecheap (*Advanced DNS*): host relativo (`cartografo`), conserva el TXT SPF del reenvío de correo. `www` redirige al dominio sin www desde Firebase.
 
 ## Convenciones
